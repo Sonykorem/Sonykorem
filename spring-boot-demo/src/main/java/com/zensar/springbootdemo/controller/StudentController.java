@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,87 +15,98 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.zensar.springbootdemo.dto.StudentDto;
 import com.zensar.springbootdemo.entity.Student;
 import com.zensar.springbootdemo.service.StudentService;
 
 @RestController
-@RequestMapping("/student-api")
+//@RequestMapping("/student-api")
+@RequestMapping(value="/student-api",produces = {MediaType.APPLICATION_JSON_VALUE,MediaType.APPLICATION_XML_VALUE},consumes = {MediaType.APPLICATION_JSON_VALUE,MediaType.APPLICATION_XML_VALUE})
 public class StudentController {
-
-	// http://localhost:1111 -> GET
-
-	private List<Student> students = new ArrayList<Student>();
-
-	public StudentController() {
-		students.add(new Student(1001, "Ram", 30));
-		students.add(new Student(1002, "Seeta", 28));
-		students.add(new Student(1003, "Laxman", 26));
-	}
-
 	@Autowired
 	private StudentService studentService;
+	
+	public StudentController() {
+	}
 
 
 	// http://localhost:1111/students/1001 GET
 	//@RequestMapping(value = "/students/{studentId}",method=RequestMethod.GET)
-	@GetMapping(value="/students/{studentId}",produces = {MediaType.APPLICATION_JSON_VALUE,MediaType.APPLICATION_XML_VALUE})
-	public Student getStudent(@PathVariable("studentId") int studentId) {
-		//System.out.println("studentId" +studentId);
-		//for(Student student:students) {
-		//	if(student.getStudentId()==studentId) {
-			//	return student;
-			//}
-
-		//}
-		//return null;
-		return studentService.getStudent(studentId);
+	@GetMapping(value="/students/{studentId}")
+	public ResponseEntity <StudentDto> getStudent(@PathVariable("studentId") int studentId) {
+		return new ResponseEntity<StudentDto>(studentService.getStudent(studentId),HttpStatus.OK);
 	}
+	
 
 	// http://localhost:1111/students
 	//@RequestMapping(value = { "/students", "/listOfStudents" },method=RequestMethod.GET)
-	@GetMapping(value = { "/students", "/listOfStudents" },produces = {MediaType.APPLICATION_JSON_VALUE,MediaType.APPLICATION_XML_VALUE})
-	public List<Student> getAllStudents() {
-		//return students;
-		return studentService.getAllStudents();
-	}
+	@GetMapping(value = {"/students","/listOfStudents"})
+	public ResponseEntity<List<StudentDto>> getStudents(
+			@RequestParam(value = "pageNumber", required = false, defaultValue = "0") int pageNumber,
+			@RequestParam(value = "pageSize", required = false, defaultValue = "5") int pageSize,
+			@RequestParam(value = "sortBy", required = false, defaultValue = "studentName") String sortBy,
+			@RequestParam(value = "dir", required = false, defaultValue = "ASC") Direction dir) {
 
+		return new ResponseEntity<List<StudentDto>>(studentService.getStudents(pageNumber, pageSize, sortBy, dir), HttpStatus.OK);
+	}
+	
+	
+	
 	// http://localhost:1111/students-- POST
 	//@RequestMapping(value = "/students",method=RequestMethod.POST)
-	@PostMapping(value="/students",consumes = {MediaType.APPLICATION_JSON_VALUE,MediaType.APPLICATION_XML_VALUE} )
-	public void insertStudent(@RequestBody Student student) {
-
-		//students.add(student);
-		//studentService.insertStudent(student);
-
-		//System.out.println("HI");
+	@PostMapping(value="/students" )
+	public ResponseEntity<StudentDto>insertStudent(@RequestBody StudentDto studentDto) {
+    return	new ResponseEntity<StudentDto>(studentService.insertStudent(studentDto),HttpStatus.OK);
+    //return studentService.insertStudent(studentDto);
 	}
 
+	
 	//@RequestMapping(value="/students/{studentId}",method=RequestMethod.PUT)
-	@PutMapping(value="/students/{studentId}",consumes = {MediaType.APPLICATION_JSON_VALUE,MediaType.APPLICATION_XML_VALUE})
-	public void updateStudent(@PathVariable("studentId")int studentId,@RequestBody Student student) {
-		Student student2 = getStudent(studentId);
-		student2.setStudentId(student.getStudentId());
-		student2.setStudentName(student.getStudentName());
-		student2.setStudentAge(student.getStudentAge());
-
-		//students.add(student2);
-		studentService.updateStudent(studentId, student);
-
+	public ResponseEntity<StudentDto> updateStudent(@PathVariable("studentId") int studentId, @RequestBody StudentDto studentDto) {
+		return new ResponseEntity<StudentDto>(studentService.updateStudent(studentId, studentDto),HttpStatus.OK);
+		//return studentService.updateStudent(studentId, studentDto);
 	}
+
 
 	//http://localhost:1111/students -> Delete
 	//@RequestMapping(value="/students/{studentId}",method=RequestMethod.DELETE)
 	@DeleteMapping("/students/{studentId}")
-	public void deleteStudent(@PathVariable("studentId")int studentId) {
-	//	for(int i=0;i<students.size();i++) {
-			//Student student=students.get(i);
-		//	if(student.getStudentId()==studentId) {
-			//	 students.remove(student);}}
-			
+	public ResponseEntity<String> deleteStudent(@PathVariable("studentId")int studentId) {
 	studentService.deleteStudent(studentId);
+	return new ResponseEntity<String>("Student deleted successfully",HttpStatus.OK);
 	}
 
 	
+	//http://localhost:1111/student-api/students/studentName/rama
+	@GetMapping("/students/studentName/{studentName}")
+	public ResponseEntity<List<StudentDto>>getByStudentName(@PathVariable("studentName")String studentName){
+	return new ResponseEntity<List<StudentDto>>(studentService.getByStudentName(studentName),HttpStatus.OK);
 }
+	@GetMapping("/students/{studentName}/{studentAge}")
+	public ResponseEntity <List<StudentDto>> findByStudentNameAndStudentAge(@PathVariable ("studentName") String studentName, @PathVariable("studentAge")int age) {
+		return new ResponseEntity<List<StudentDto>>(studentService.findByStudentNameAndStudentAge(studentName,age),HttpStatus.OK);
+	}	
+	
+	
+	/*@GetMapping("/students/{studentName}/{studentAge}")
+	public List<Student> findByStudentNameOrStudentAge(@PathVariable ("studentName") String studentName, @PathVariable("studentAge")int age) {
+		return studentService.findByStudentNameOrStudentAge(studentName, age);
+	}
+	
+	
+	
+	@GetMapping(value="/students/{studentName}")
+	public List<Student> test(@PathVariable ("studentName") String studentName) {
+		return studentService.test(studentName);
+		}
+		
+		
+ 	@GetMapping(value="/students/{studentName}/{studentAge}")
+	public List<Student> test1(@PathVariable ("studentName") String studentName, @PathVariable("studentAge")int age) {
+		return studentService.test1(studentName, age);
+}*/
+}
+	
