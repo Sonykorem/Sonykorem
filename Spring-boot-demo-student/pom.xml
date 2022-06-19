@@ -10,9 +10,9 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.zensar</groupId>
-	<artifactId>spring-boot-CouponService</artifactId>
+	<artifactId>spring-boot-StudentService</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>spring-boot-CouponService</name>
+	<name>spring-boot-StudentService</name>
 	<description>Demo project for Spring Boot</description>
 	<packaging>war</packaging>
 	<properties>
