@@ -1,0 +1,33 @@
+server:
+  port: 1111
+spring:
+  datasource:
+    password: Temp1234
+    url: jdbc:mysql://localhost:3306/mydb
+    username: root
+  jpa:
+    hibernate:
+      ddl-auto: create
+      
+  application:
+    name: product-service
+    
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: true
+    
+
+    
+
+  
+
+    
+ 
+
+      
+      
+    
+      
+      
+    
